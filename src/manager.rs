@@ -1,14 +1,14 @@
 use std::collections::HashMap;
 
 use bollard::{
-    container::{Config, CreateContainerOptions, ListContainersOptions, RemoveContainerOptions},
-    models::{ContainerCreateResponse, ContainerSummaryInner, HostConfig, Ipam, PortBinding},
+    container::{Config, CreateContainerOptions, ListContainersOptions},
+    models::{ContainerSummaryInner, HostConfig, Ipam, PortBinding},
     network::{CreateNetworkOptions, ListNetworksOptions},
     Docker,
 };
 use serde::Serialize;
 
-use crate::{config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL, DB_LABEL};
+use crate::{config::Config as Conf, const_expr_count, hash_map};
 
 type Result<T> = std::result::Result<T, bollard::errors::Error>;
 
@@ -62,49 +62,14 @@ impl ContainerManager {
     pub async fn init(&self) -> Result<()> {
         // Check network exsists and create it if it doesn't
         println!("Checking network exists...");
-        let network_exists = !self
-            .docker_instance
-            .list_networks(Some(ListNetworksOptions {
-                filters: hash_map! {
-                    "label" => vec![&self.config.network_name as &str],
-                    "name" => vec![&self.config.network_name as &str]
-                },
-            }))
-            .await?
-            .is_empty();
+        let network_exists = self.network_exists().await?;
         if !network_exists {
             println!("Creating network...");
-            self.docker_instance
-                .create_network(CreateNetworkOptions {
-                    name: (&self.config.network_name as &str),
-                    check_duplicate: true,
-                    driver: "bridge",
-                    internal: false,
-                    attachable: false,
-                    ingress: false,
-                    ipam: Ipam {
-                        ..Default::default()
-                    },
-                    enable_ipv6: false,
-                    options: HashMap::new(),
-                    labels: hash_map! {&self.config.network_name as &str => ""},
-                })
-                .await?;
+            self.create_network(&self.config.network_name).await?;
         }
 
         // Check proxy container exists
-        let proxy = self
-            .docker_instance
-            .list_containers(Some(ListContainersOptions {
-                all: true,
-                filters: hash_map! {
-                    "label" => vec![&self.config.proxy_label as &str]
-                },
-                ..Default::default()
-            }))
-            .await?
-            .get(0)
-            .cloned();
+        let proxy = self.get_proxy().await?;
         match proxy {
             Some(p) if p.state != Some("running".to_string()) => {
                 self.docker_instance
@@ -153,5 +118,53 @@ impl ContainerManager {
             _ => {}
         };
         Ok(())
+    }
+
+    async fn network_exists(&self) -> Result<bool> {
+        Ok(!self
+            .docker_instance
+            .list_networks(Some(ListNetworksOptions {
+                filters: hash_map! {
+                    "label" => vec![&self.config.network_name as &str],
+                    "name" => vec![&self.config.network_name as &str]
+                },
+            }))
+            .await?
+            .is_empty())
+    }
+
+    async fn create_network<T: AsRef<str>>(&self, network_name: T) -> Result<()> {
+        self.docker_instance
+                .create_network(CreateNetworkOptions {
+                    name: network_name.as_ref(),
+                    check_duplicate: true,
+                    driver: "bridge",
+                    internal: false,
+                    attachable: false,
+                    ingress: false,
+                    ipam: Ipam {
+                        ..Default::default()
+                    },
+                    enable_ipv6: false,
+                    options: HashMap::new(),
+                    labels: hash_map! {network_name.as_ref() => ""},
+                })
+                .await?;
+        Ok(())
+    }
+
+    async fn get_proxy(&self) -> Result<Option<ContainerSummaryInner>> {
+        Ok(self
+            .docker_instance
+            .list_containers(Some(ListContainersOptions {
+                all: true,
+                filters: hash_map! {
+                    "label" => vec![&self.config.proxy_label as &str]
+                },
+                ..Default::default()
+            }))
+            .await?
+            .get(0)
+            .cloned())
     }
 }

@@ -1,5 +1,6 @@
 use bollard::{Docker, API_DEFAULT_VERSION};
-use warp::Filter;
+
+use manager::ContainerManager;
 
 mod manager;
 mod config;
@@ -53,5 +54,6 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let docker = Docker::connect_with_unix("/var/run/docker.sock", 120, API_DEFAULT_VERSION)?;
     let inst: ContainerManager = docker.into();
 
-    inst.init().await;
+    inst.init().await?;
+    Ok(())
 }
