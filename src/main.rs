@@ -1,9 +1,14 @@
 use bollard::{Docker, API_DEFAULT_VERSION};
 
 use manager::ContainerManager;
+use warp::Filter;
 
-mod manager;
 mod config;
+mod filters;
+mod handlers;
+mod manager;
+
+const CONTAINER_LABEL: &str = "prometheus.makepress.containers";
 
 #[macro_export]
 macro_rules! const_expr_count {
@@ -55,5 +60,11 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let inst: ContainerManager = docker.into();
 
     inst.init().await?;
+
+    println!("STARTED!");
+    warp::serve(filters::all(inst).with(warp::log("makepress")))
+        .run(([0, 0, 0, 0], 8080))
+        .await;
+
     Ok(())
 }

@@ -8,7 +8,7 @@ use bollard::{
 };
 use serde::Serialize;
 
-use crate::{config::Config as Conf, const_expr_count, hash_map};
+use crate::{config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL};
 
 type Result<T> = std::result::Result<T, bollard::errors::Error>;
 
@@ -135,21 +135,21 @@ impl ContainerManager {
 
     async fn create_network<T: AsRef<str>>(&self, network_name: T) -> Result<()> {
         self.docker_instance
-                .create_network(CreateNetworkOptions {
-                    name: network_name.as_ref(),
-                    check_duplicate: true,
-                    driver: "bridge",
-                    internal: false,
-                    attachable: false,
-                    ingress: false,
-                    ipam: Ipam {
-                        ..Default::default()
-                    },
-                    enable_ipv6: false,
-                    options: HashMap::new(),
-                    labels: hash_map! {network_name.as_ref() => ""},
-                })
-                .await?;
+            .create_network(CreateNetworkOptions {
+                name: network_name.as_ref(),
+                check_duplicate: true,
+                driver: "bridge",
+                internal: false,
+                attachable: false,
+                ingress: false,
+                ipam: Ipam {
+                    ..Default::default()
+                },
+                enable_ipv6: false,
+                options: HashMap::new(),
+                labels: hash_map! {network_name.as_ref() => ""},
+            })
+            .await?;
         Ok(())
     }
 
@@ -166,5 +166,22 @@ impl ContainerManager {
             .await?
             .get(0)
             .cloned())
+    }
+
+    pub async fn list_containers(&self) -> Result<ListContainersResponse> {
+        let containers = self
+            .docker_instance
+            .list_containers(Some(ListContainersOptions::<String> {
+                all: true,
+                filters: hash_map! {
+                    "label".to_string() => vec![CONTAINER_LABEL.to_string()]
+                },
+                ..Default::default()
+            }))
+            .await?
+            .into_iter()
+            .map(|s| s.into())
+            .collect();
+        Ok(ListContainersResponse { containers })
     }
 }
