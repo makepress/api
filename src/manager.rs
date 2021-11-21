@@ -2,13 +2,13 @@ use std::collections::HashMap;
 
 use bollard::{
     container::{Config, CreateContainerOptions, ListContainersOptions},
-    models::{ContainerSummaryInner, HostConfig, Ipam, PortBinding},
+    models::{ContainerCreateResponse, ContainerSummaryInner, HostConfig, Ipam, PortBinding},
     network::{CreateNetworkOptions, ListNetworksOptions},
     Docker,
 };
 use serde::Serialize;
 
-use crate::{config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL};
+use crate::{config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL, DB_LABEL};
 
 type Result<T> = std::result::Result<T, bollard::errors::Error>;
 
@@ -183,5 +183,63 @@ impl ContainerManager {
             .map(|s| s.into())
             .collect();
         Ok(ListContainersResponse { containers })
+    }
+
+    pub async fn create_new_container(
+        &self,
+        name: String,
+    ) -> Result<(ContainerCreateResponse, ContainerCreateResponse)> {
+        let a = self
+            .docker_instance
+            .create_container(
+                Some(CreateContainerOptions {
+                    name: format!("{}-db", name),
+                }),
+                Config {
+                    env: Some(vec![
+                        "MYSQL_DATABASE=wordpress".to_string(),
+                        format!("MYSQL_USER={}", self.config.db_username),
+                        format!("MYSQL_PASSWORD={}", self.config.db_password),
+                        "MYSQL_RANDOM_ROOT_PASSWORD=1".to_string(),
+                    ]),
+                    image: Some("mysql:5.7".to_string()),
+                    labels: Some(hash_map! {
+                        DB_LABEL.to_string() => "".to_string(),
+                        "prometheus.makepress.name".to_string() => name.clone()
+                    }),
+                    host_config: Some(HostConfig {
+                        network_mode: Some(self.config.network_name.clone()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+            )
+            .await?;
+        let b = self
+            .docker_instance
+            .create_container(
+                Some(CreateContainerOptions { name: name.clone() }),
+                Config {
+                    env: Some(vec![
+                        format!("WORDPRESS_DB_HOST={}-db", name),
+                        format!("WORDPRESS_DB_USER={}", self.config.db_username),
+                        format!("WORDPRESS_DB_PASSWORD={}", self.config.db_password),
+                        "WORDPRESS_DB_NAME=wordpress".to_string(),
+                        format!("VIRTUAL_HOST={}.{}", name, self.config.domain),
+                    ]),
+                    image: Some("wordpress".to_string()),
+                    labels: Some(hash_map! {
+                        CONTAINER_LABEL.to_string() => "".to_string(),
+                        "prometheus.makepress.name".to_string() => name.clone()
+                    }),
+                    host_config: Some(HostConfig {
+                        network_mode: Some(self.config.network_name.clone()),
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                },
+            )
+            .await?;
+        Ok((a, b))
     }
 }

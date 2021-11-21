@@ -9,6 +9,7 @@ mod handlers;
 mod manager;
 
 const CONTAINER_LABEL: &str = "prometheus.makepress.containers";
+const DB_LABEL: &str = "prometheus.makepress.db";
 
 #[macro_export]
 macro_rules! const_expr_count {

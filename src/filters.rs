@@ -5,7 +5,7 @@ use crate::ContainerManager;
 pub fn all(
     manager: ContainerManager,
 ) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-    list_containers(manager)
+    list_containers(manager.clone()).or(create_container(manager))
 }
 
 fn with_manager(
@@ -22,4 +22,14 @@ fn list_containers(
         .and(warp::get())
         .and(with_manager(manager))
         .and_then(crate::handlers::list_containers)
+}
+
+/// POST /create/:name with JSON body
+fn create_container(
+    manager: ContainerManager,
+) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::path!("create" / String)
+        .and(warp::post())
+        .and(with_manager(manager))
+        .and_then(crate::handlers::create_container)
 }
