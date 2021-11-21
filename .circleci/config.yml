@@ -1,0 +1,20 @@
+version: 2.1
+
+workflows:
+  version: 2
+  rust:
+    jobs:
+      - build:
+          context: [aws]
+jobs:
+  build:
+    executor: makepress-orb/rust
+    steps:
+      - checkout
+      - makepress-orb/with-rust:
+          steps:
+            - run: |
+                just check
+                just test
+orbs:
+  makepress-orb: makepress/makepress-orb@2.0.0
