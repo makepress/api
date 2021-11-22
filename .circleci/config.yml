@@ -17,6 +17,12 @@ workflows:
             - check
             - test
             - makepress-orb/release-please-single
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              only:
+                - main
       - publish-main:
           requires:
             - build
