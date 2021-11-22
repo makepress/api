@@ -6,10 +6,32 @@ workflows:
     jobs:
       - check:
           context: [aws]
-      - build-and-deploy:
+      - test:
           context: [aws]
+      - udeps:
+          context: [aws]
+      - makepress-orb/release-please-single:
+          context: [lulubot]
+      - build:
           requires:
             - check
+            - test
+            - makepress-orb/release-please-single
+      - publish-main:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - main
+      - publish-tagged:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
 jobs:
   check:
     executor: makepress-orb/rust
@@ -17,15 +39,51 @@ jobs:
       - checkout
       - makepress-orb/with-rust:
           steps:
-            - run: |
-                just check
-                just test
-  build-and-deploy:
+            - run: just check
+  test:
+    executor: makepress-orb/rust
+    steps:
+      - checkout
+      - makepress-orb/with-rust:
+          steps:
+            - run: just test
+  udeps:
+    executor: makepress-orb/rust
+    steps:
+      - checkout
+      - makepress-orb/with-rust:
+          steps:
+            - run: just udeps
+  build:
     executor: aws-ecr/default
     steps:
-      - aws-ecr/build-and-push-image:
-          repo: makepress-api
-          create-repo: true
+      - aws-ecr/build-image:
+          repo: "${AWS_RESOURCE_NAME_PREFIX}"
+      - run:
+          command: docker save -o image.tar "${AWS_RESOURCE_NAME_PREFIX}"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - "./image.tar"
+  publish-main:
+    executor: aws-ecr/default
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          command: docker load -i /tmp/workspace/image.tar
+      - aws-ecr/push-image:
+          repo: ${AWS_RESOURCE_NAME_PREFIX}
+  publish-tagged:
+    executor: aws-ecr/default
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - run:
+          command: docker load -i /tmp/workspace/image.tar
+      - aws-ecr/push-image:
+          repo: ${AWS_RESOURCE_NAME_PREFIX}
+          tag: ${CIRCLE_TAG/v/''}
 
 orbs:
   makepress-orb: makepress/makepress-orb@2.0.0
