@@ -13,6 +13,7 @@ workflows:
       - makepress-orb/release-please-single:
           context: [lulubot]
       - build-and-publish-main:
+          context: [aws]
           requires:
             - check
             - test
@@ -22,6 +23,7 @@ workflows:
               only:
                 - main
       - build-and-publish-tagged:
+          context: [aws]
           requires:
             - check
             - test
