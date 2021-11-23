@@ -17,6 +17,7 @@ workflows:
           requires:
             - check
             - test
+            - udeps
             - makepress-orb/release-please-single
           filters:
             branches:
@@ -27,6 +28,7 @@ workflows:
           requires:
             - check
             - test
+            - udeps
             - makepress-orb/release-please-single
           filters:
             tags:
