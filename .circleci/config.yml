@@ -12,27 +12,20 @@ workflows:
           context: [aws]
       - makepress-orb/release-please-single:
           context: [lulubot]
-      - build:
+      - build-and-publish-main:
           requires:
             - check
             - test
             - makepress-orb/release-please-single
           filters:
-            tags:
-              only: /^v.*/
             branches:
               only:
                 - main
-      - publish-main:
+      - build-and-publish-tagged:
           requires:
-            - build
-          filters:
-            branches:
-              only:
-                - main
-      - publish-tagged:
-          requires:
-            - build
+            - check
+            - test
+            - makepress-orb/release-please-single
           filters:
             tags:
               only: /^v.*/
@@ -60,35 +53,20 @@ jobs:
       - makepress-orb/with-rust:
           steps:
             - run: just udeps
-  build:
+  build-and-publish-main:
     executor: aws-ecr/default
     steps:
       - aws-ecr/build-image:
-          repo: "${AWS_RESOURCE_NAME_PREFIX}"
-      - run:
-          command: docker save -o image.tar "${AWS_RESOURCE_NAME_PREFIX}"
-      - persist_to_workspace:
-          root: .
-          paths:
-            - "./image.tar"
-  publish-main:
+          repo: makepress-api
+      - aws-ecr/push-image:
+          repo: makepress-api
+  build-and-publish-tagged:
     executor: aws-ecr/default
     steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          command: docker load -i /tmp/workspace/image.tar
+      - aws-ecr/build-image:
+          repo: makepress-api
       - aws-ecr/push-image:
-          repo: ${AWS_RESOURCE_NAME_PREFIX}
-  publish-tagged:
-    executor: aws-ecr/default
-    steps:
-      - attach_workspace:
-          at: /tmp/workspace
-      - run:
-          command: docker load -i /tmp/workspace/image.tar
-      - aws-ecr/push-image:
-          repo: ${AWS_RESOURCE_NAME_PREFIX}
+          repo: makepress-api
           tag: ${CIRCLE_TAG/v/''}
 
 orbs:
