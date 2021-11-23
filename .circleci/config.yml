@@ -56,6 +56,7 @@ jobs:
   build-and-publish-main:
     executor: aws-ecr/default
     steps:
+      - checkout
       - aws-ecr/build-and-push-image:
           repo: makepress-api
           create-repo: true
