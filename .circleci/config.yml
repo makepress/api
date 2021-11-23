@@ -56,17 +56,16 @@ jobs:
   build-and-publish-main:
     executor: aws-ecr/default
     steps:
-      - aws-ecr/build-image:
+      - checkout
+      - aws-ecr/build-and-push-image:
           repo: makepress-api
-      - aws-ecr/push-image:
-          repo: makepress-api
+          create-repo: true
   build-and-publish-tagged:
     executor: aws-ecr/default
     steps:
-      - aws-ecr/build-image:
+      - aws-ecr/build-and-push-image:
           repo: makepress-api
-      - aws-ecr/push-image:
-          repo: makepress-api
+          create-repo: true
           tag: ${CIRCLE_TAG/v/''}
 
 orbs:
