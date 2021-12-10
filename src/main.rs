@@ -1,11 +1,7 @@
-use bollard::{Docker, API_DEFAULT_VERSION};
-
-use manager::ContainerManager;
+use bollard::Docker;
 use warp::Filter;
 
 mod config;
-mod filters;
-mod handlers;
 mod manager;
 
 const CONTAINER_LABEL: &str = "prometheus.makepress.containers";
@@ -57,13 +53,11 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     }
     pretty_env_logger::init();
 
-    let docker = Docker::connect_with_unix("/var/run/docker.sock", 120, API_DEFAULT_VERSION)?;
-    let inst: ContainerManager = docker.into();
+    let docker = Docker::connect_with_unix_defaults()?;
 
-    inst.init().await?;
+    let manager = manager::ContainerManager::create_from_envs(docker).await?;
 
-    println!("STARTED!");
-    warp::serve(filters::all(inst).with(warp::log("makepress")))
+    warp::serve(makepress_lib::routes(manager).with(warp::log("makepress")))
         .run(([0, 0, 0, 0], 8080))
         .await;
 

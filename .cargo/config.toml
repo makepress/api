@@ -7,3 +7,6 @@ lto = "off"
 rustflags = [
     "-C", "link-arg=-fuse-ld=lld",
 ]
+
+[registries]
+makepress = { index = "https://github.com/makepress/crates.git" }
