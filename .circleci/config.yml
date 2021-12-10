@@ -73,5 +73,5 @@ jobs:
           tag: ${CIRCLE_TAG/v/''}
 
 orbs:
-  makepress-orb: makepress/makepress-orb@2.1.0
+  makepress-orb: makepress/makepress-orb@2.2.0
   aws-ecr: circleci/aws-ecr@7.3.0
