@@ -42,6 +42,7 @@ jobs:
       - checkout
       - makepress-orb/with-rust:
           steps:
+            - run: cargo login --registry=makepress $KTRA_TOKEN
             - run: just check
   test:
     executor: makepress-orb/rust
@@ -49,6 +50,7 @@ jobs:
       - checkout
       - makepress-orb/with-rust:
           steps:
+            - run: cargo login --registry=makepress $KTRA_TOKEN
             - run: just test
   udeps:
     executor: makepress-orb/rust
@@ -56,6 +58,7 @@ jobs:
       - checkout
       - makepress-orb/with-rust:
           steps:
+            - run: cargo login --registry=makepress $KTRA_TOKEN
             - run: just udeps
   build-and-publish-main:
     executor: aws-ecr/default
