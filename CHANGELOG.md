@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://www.github.com/makepress/api/compare/v0.1.0...v1.0.0) (2021-12-10)
+
+
+### ⚠ BREAKING CHANGES
+
+* Almost complete rewrite
+
+### Features
+
+* Almost complete rewrite ([8e38d00](https://www.github.com/makepress/api/commit/8e38d00e08aa29ed3503d71976d3da5da869af7b))
+
 ## 0.1.0 (2021-11-22)
 
 
