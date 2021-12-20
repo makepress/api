@@ -9,7 +9,7 @@ edition = "2018"
 async-trait = "0.1.52"
 bollard = "0.11.1"
 log = "0.4.14"
-makepress-lib = { version = "1.0.0", registry = "makepress" }
+makepress-lib = { version = "2.0.0", registry = "makepress" }
 pretty_env_logger = "0.4.0"
 serde = "1.0.132"
 tokio = { version = "1.15.0", features = ["full"] }
