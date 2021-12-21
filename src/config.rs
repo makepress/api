@@ -61,7 +61,7 @@ impl Default for Config {
             db_username: "makepress".to_string(),
             db_password: "makepress".to_string(),
             proxy_label: "prometheus.makepress.proxy".to_string(),
-            domain: "prometheus.makepress".to_string(),
+            domain: "localhost".to_string(),
             certs: "/etc/nginx/certs".to_string(),
         }
     }
