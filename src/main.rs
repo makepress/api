@@ -1,8 +1,12 @@
+use std::convert::TryInto;
+
 use bollard::Docker;
 use warp::Filter;
 
+mod backup;
 mod config;
 mod manager;
+mod routes;
 
 const CONTAINER_LABEL: &str = "prometheus.makepress.containers";
 const DB_LABEL: &str = "prometheus.makepress.db";
@@ -54,10 +58,11 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
 
     let docker = Docker::connect_with_unix_defaults()?;
+    let db = sled::open("backups")?.try_into()?;
 
-    let manager = manager::ContainerManager::create_from_envs(docker).await?;
+    let manager = manager::ContainerManager::create_from_envs(docker, db).await?;
 
-    warp::serve(makepress_lib::routes(manager).with(warp::log("makepress")))
+    warp::serve(makepress_lib::routes(manager).or(routes::all()).with(warp::log("makepress")))
         .run(([0, 0, 0, 0], 8080))
         .await;
 
