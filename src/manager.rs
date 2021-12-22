@@ -289,13 +289,13 @@ impl MakepressManager for ContainerManager {
                 (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
             })
             .map(|status| BackupCheckResponse {
-                status: match status {
-                    BackupState::NotFound => "Not Found",
-                    BackupState::Pending => "Pending",
-                    BackupState::Running => "Running",
-                    BackupState::Error(e) => &format!("Error: {}", e),
-                    BackupState::Finished => "Finished",
-                }.to_string(),
+                status: match status.clone() {
+                    BackupState::NotFound => "Not Found".to_string(),
+                    BackupState::Pending => "Pending".to_string(),
+                    BackupState::Running => "Running".to_string(),
+                    BackupState::Error(e) => format!("Error: {}", e),
+                    BackupState::Finished => "Finished".to_string(),
+                },
                 access_url: if let BackupState::Finished = status {Some(format!("http://api.{}/backups/download/{}", self.config.domain, id))} else {None},
             })
     }
