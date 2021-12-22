@@ -4,7 +4,7 @@ use makepress_lib::uuid::Uuid;
 use sled::{Db, Transactional, Tree};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum BackupState {
+pub enum BackupState {
     NotFound,
     Pending,
     Running,
