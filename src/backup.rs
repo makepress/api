@@ -13,7 +13,7 @@ pub(crate) enum BackupState {
 }
 
 #[derive(Debug, Clone)]
-pub(crate) struct BackupManager {
+pub struct BackupManager {
     pending: Tree,
     running: Tree,
     errored: Tree,
