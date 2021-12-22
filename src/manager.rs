@@ -247,9 +247,9 @@ impl MakepressManager for ContainerManager {
     async fn start_backup<T: AsRef<str> + Send>(&self, name: T) -> Result<BackupAcceptedResponse> {
         let id = Uuid::new_v4();
         let s = self.clone();
-        let n = name.as_ref().to_string().clone();
+        let n = name.as_ref().to_string();
         tokio::spawn(async move {
-            s.backup_manager.set_status(id, BackupState::Running);
+            s.backup_manager.set_status(id, BackupState::Running).unwrap();
             let r = s
                 .docker_instance
                 .create_exec(
@@ -277,7 +277,7 @@ impl MakepressManager for ContainerManager {
                     Ok(_) => BackupState::Finished,
                     Err(e) => BackupState::Error(e.to_string()),
                 },
-            );
+            ).unwrap();
         });
         Ok(BackupAcceptedResponse { job_id: id })
     }
@@ -301,7 +301,7 @@ impl MakepressManager for ContainerManager {
     }
 
     /// This version of makepress does not yet support cancelling backups
-    async fn cancel_backup(&self, id: Uuid) -> Result<()> {
+    async fn cancel_backup(&self, _id: Uuid) -> Result<()> {
         Err(Error::IOError(std::io::Error::new(std::io::ErrorKind::Unsupported, "This version of the makepress api does not support cancelling backups")))
     }
 }
