@@ -1,6 +1,7 @@
 use bollard::Docker;
 use warp::Filter;
 
+mod backup;
 mod config;
 mod manager;
 

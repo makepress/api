@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::Arc};
 
 use async_trait::async_trait;
 use bollard::{
@@ -9,7 +9,10 @@ use bollard::{
 };
 use makepress_lib::{Error, InstanceInfo, MakepressManager, Status};
 
-use crate::{config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL, DB_LABEL};
+use crate::{
+    backup::BackupManager, config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL,
+    DB_LABEL,
+};
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -25,15 +28,8 @@ macro_rules! flushed_print {
 pub struct ContainerManager {
     docker_instance: Docker,
     config: Conf,
-}
 
-impl From<Docker> for ContainerManager {
-    fn from(d: Docker) -> Self {
-        Self {
-            docker_instance: d,
-            config: Conf::from_envs(),
-        }
-    }
+    backup_manager: Arc<BackupManager>,
 }
 
 #[async_trait]
@@ -240,20 +236,28 @@ impl MakepressManager for ContainerManager {
 }
 
 impl ContainerManager {
-    pub fn new(docker_instance: Docker, config: Conf) -> Self {
+    pub fn new(docker_instance: Docker, config: Conf, backup_manager: BackupManager) -> Self {
         Self {
             docker_instance,
             config,
+            backup_manager: Arc::new(backup_manager),
         }
     }
 
-    pub async fn create_from_envs(docker_instance: Docker) -> Result<Self> {
+    pub async fn create_from_envs(
+        docker_instance: Docker,
+        backup_manager: BackupManager,
+    ) -> Result<Self> {
         let config = Conf::from_envs();
-        Self::create(docker_instance, config).await
+        Self::create(docker_instance, config, backup_manager).await
     }
 
-    pub async fn create(docker_instance: Docker, config: Conf) -> Result<Self> {
-        let s = Self::new(docker_instance, config);
+    pub async fn create(
+        docker_instance: Docker,
+        config: Conf,
+        backup_manager: BackupManager,
+    ) -> Result<Self> {
+        let s = Self::new(docker_instance, config, backup_manager);
 
         s.init().await?;
 
