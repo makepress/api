@@ -299,6 +299,11 @@ impl MakepressManager for ContainerManager {
                 access_url: if let BackupState::Finished = status {Some(format!("http://api.{}/backups/download/{}", self.config.domain, id))} else {None},
             })
     }
+
+    /// This version of makepress does not yet support cancelling backups
+    async fn cancel_backup(&self, id: Uuid) -> Result<()> {
+        Err(Error::IOError(std::io::Error::new(std::io::ErrorKind::Unsupported, "This version of the makepress api does not support cancelling backups")))
+    }
 }
 
 impl ContainerManager {
