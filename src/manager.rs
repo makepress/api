@@ -10,7 +10,8 @@ use bollard::{
     Docker,
 };
 use makepress_lib::{
-    uuid::Uuid, BackupAcceptedResponse, Error, InstanceInfo, MakepressManager, Status,
+    uuid::Uuid, BackupAcceptedResponse, BackupCheckResponse, Error, InstanceInfo, MakepressManager,
+    Status,
 };
 
 use crate::{
@@ -279,6 +280,24 @@ impl MakepressManager for ContainerManager {
             );
         });
         Ok(BackupAcceptedResponse { job_id: id })
+    }
+
+    async fn check_backup(&self, id: Uuid) -> Result<BackupCheckResponse> {
+        self.backup_manager
+            .get_status(id)
+            .map_err::<Error, _>(|e| {
+                (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
+            })
+            .map(|status| BackupCheckResponse {
+                status: match status {
+                    BackupState::NotFound => "Not Found",
+                    BackupState::Pending => "Pending",
+                    BackupState::Running => "Running",
+                    BackupState::Error(e) => &format!("Error: {}", e),
+                    BackupState::Finished => "Finished",
+                }.to_string(),
+                access_url: if let BackupState::Finished = status {Some(format!("http://api.{}/backups/download/{}", self.config.domain, id))} else {None},
+            })
     }
 }
 
