@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/makepress/api/compare/v1.0.1...v1.1.0) (2021-12-22)
+
+
+### Features
+
+* Add backup create method ([733766b](https://www.github.com/makepress/api/commit/733766b423faf4d8e73f708fe2105ede05d779e9))
+* Add cancel_backup method ([c00f852](https://www.github.com/makepress/api/commit/c00f85280f6f37baacc07b9ff044680367683d06))
+* Add method to check backup status ([ca3bd17](https://www.github.com/makepress/api/commit/ca3bd17df93cbbf08247710cc853ddd7f57391d4))
+* Add route to download backup files ([e6b45e0](https://www.github.com/makepress/api/commit/e6b45e06f046dd92c84ecc62b65f77fa065ccdcd))
+
+
+### Bug Fixes
+
+* Change BackupState serialization ([88b2e1c](https://www.github.com/makepress/api/commit/88b2e1c4942033a118969180f79c88370b745563))
+* Change default domain to be more generic ([005e83b](https://www.github.com/makepress/api/commit/005e83b2d15650540eff14619eac0ab9cbda4415))
+* Make BackupManager have public visibility ([6b8cfcb](https://www.github.com/makepress/api/commit/6b8cfcb97b9b01764166ed347d4d2f28e9a33837))
+* Make BackupState public ([b6fe7a1](https://www.github.com/makepress/api/commit/b6fe7a143e30d2a1b1348f9634369957956e8cc1))
+
 ### [1.0.1](https://www.github.com/makepress/api/compare/v1.0.0...v1.0.1) (2021-12-20)
 
 
