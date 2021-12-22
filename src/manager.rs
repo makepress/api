@@ -3,15 +3,20 @@ use std::{collections::HashMap, sync::Arc};
 use async_trait::async_trait;
 use bollard::{
     container::{Config, CreateContainerOptions, ListContainersOptions, RemoveContainerOptions},
+    exec::CreateExecOptions,
     models::{ContainerSummaryInner, HostConfig, Ipam, PortBinding},
     network::{CreateNetworkOptions, ListNetworksOptions},
+    volume::{CreateVolumeOptions, ListVolumesOptions},
     Docker,
 };
-use makepress_lib::{Error, InstanceInfo, MakepressManager, Status};
+use makepress_lib::{
+    uuid::Uuid, BackupAcceptedResponse, Error, InstanceInfo, MakepressManager, Status,
+};
 
 use crate::{
-    backup::BackupManager, config::Config as Conf, const_expr_count, hash_map, CONTAINER_LABEL,
-    DB_LABEL,
+    backup::{BackupManager, BackupState},
+    config::Config as Conf,
+    const_expr_count, hash_map, CONTAINER_LABEL, DB_LABEL,
 };
 
 type Result<T> = std::result::Result<T, Error>;
@@ -112,6 +117,9 @@ impl MakepressManager for ContainerManager {
 
     async fn create<T: AsRef<str> + Send>(&self, name: T) -> Result<InstanceInfo> {
         let n = name.as_ref();
+        if n == "api" {
+            return Err(Error::Unknown);
+        }
         self.docker_instance
             .create_container(
                 Some(CreateContainerOptions {
@@ -131,6 +139,7 @@ impl MakepressManager for ContainerManager {
                     }),
                     host_config: Some(HostConfig {
                         network_mode: Some(self.config.network_name.clone()),
+                        binds: Some(vec![format!("{}:/backups", self.config.backups_volume)]),
                         ..Default::default()
                     }),
                     ..Default::default()
@@ -233,6 +242,44 @@ impl MakepressManager for ContainerManager {
                 (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
             })
     }
+
+    async fn start_backup<T: AsRef<str> + Send>(&self, name: T) -> Result<BackupAcceptedResponse> {
+        let id = Uuid::new_v4();
+        let s = self.clone();
+        let n = name.as_ref().to_string().clone();
+        tokio::spawn(async move {
+            s.backup_manager.set_status(id, BackupState::Running);
+            let r = s
+                .docker_instance
+                .create_exec(
+                    &format!("{}-db", n),
+                    CreateExecOptions::<String> {
+                        cmd: Some(vec![
+                            "mysqldump".to_string(),
+                            "-u".to_string(),
+                            s.config.db_username,
+                            "-p".to_string(),
+                            s.config.db_password,
+                            "wordpress".to_string(),
+                            "|".to_string(),
+                            "gzip".to_string(),
+                            ">".to_string(),
+                            format!("/backups/{}.sql.gz", id),
+                        ]),
+                        ..Default::default()
+                    },
+                )
+                .await;
+            s.backup_manager.set_status(
+                id,
+                match r {
+                    Ok(_) => BackupState::Finished,
+                    Err(e) => BackupState::Error(e.to_string()),
+                },
+            );
+        });
+        Ok(BackupAcceptedResponse { job_id: id })
+    }
 }
 
 impl ContainerManager {
@@ -270,9 +317,19 @@ impl ContainerManager {
             flushed_print!("MISSING\nCreating network...");
             self.create_network().await?;
             println!("DONE");
+        } else {
+            println!("FOUND");
+        }
+        flushed_print!("Checking for backup volume...");
+        if !self.check_volume().await? {
+            flushed_print!("MISSING\nCreating backup volume...");
+            self.create_volume().await?;
+            println!("DONE")
+        } else {
+            println!("FOUND");
         }
 
-        flushed_print!("FOUND\nChecking for proxy...");
+        flushed_print!("Checking for proxy...");
         match self.get_proxy().await? {
             Some(proxy) if proxy.state != Some("running".to_string()) => {
                 println!("NOT RUNNING");
@@ -396,6 +453,33 @@ impl ContainerManager {
                     ..Default::default()
                 },
             )
+            .await
+            .map_err::<Error, _>(|e| {
+                (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
+            })?;
+        Ok(())
+    }
+
+    async fn check_volume(&self) -> Result<bool> {
+        self.docker_instance
+            .list_volumes(Some(ListVolumesOptions {
+                filters: hash_map! {
+                    "name" => vec![&self.config.backups_volume as &str]
+                },
+            }))
+            .await
+            .map_err::<Error, _>(|e| {
+                (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
+            })
+            .map(|v| !v.volumes.is_empty())
+    }
+
+    async fn create_volume(&self) -> Result<()> {
+        self.docker_instance
+            .create_volume(CreateVolumeOptions::<&str> {
+                name: &self.config.backups_volume,
+                ..Default::default()
+            })
             .await
             .map_err::<Error, _>(|e| {
                 (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()

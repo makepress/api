@@ -9,6 +9,7 @@ pub struct Config {
     pub proxy_label: String,
     pub domain: String,
     pub certs: String,
+    pub backups_volume: String,
 }
 
 impl Config {
@@ -19,6 +20,7 @@ impl Config {
         proxy_label: Option<T>,
         domain: Option<T>,
         certs: Option<T>,
+        backups_volume: Option<T>,
     ) -> Self {
         Self {
             network_name: network_name
@@ -39,6 +41,9 @@ impl Config {
             certs: certs
                 .map(|t| t.into())
                 .unwrap_or_else(|| Self::default().certs),
+            backups_volume: backups_volume
+                .map(|t| t.into())
+                .unwrap_or_else(|| Self::default().backups_volume),
         }
     }
 
@@ -50,6 +55,7 @@ impl Config {
             var("MAKEPRESS_PROXY_LABEL").ok(),
             var("MAKEPRESS_DOMAIN").ok(),
             var("MAKEPRESS_CERTS").ok(),
+            var("BACKUPS_VOLUME").ok(),
         )
     }
 }
@@ -63,6 +69,7 @@ impl Default for Config {
             proxy_label: "prometheus.makepress.proxy".to_string(),
             domain: "localhost".to_string(),
             certs: "/etc/nginx/certs".to_string(),
+            backups_volume: "makepress-backups".to_string(),
         }
     }
 }
