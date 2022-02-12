@@ -8,8 +8,6 @@ workflows:
           context: [aws]
       - test:
           context: [aws]
-      - udeps:
-          context: [aws]
       - makepress-orb/release-please-single:
           context: [lulubot]
       - build-and-publish-main:
@@ -17,7 +15,6 @@ workflows:
           requires:
             - check
             - test
-            - udeps
             - makepress-orb/release-please-single
           filters:
             branches:
@@ -28,7 +25,6 @@ workflows:
           requires:
             - check
             - test
-            - udeps
             - makepress-orb/release-please-single
           filters:
             tags:
@@ -52,14 +48,6 @@ jobs:
           steps:
             - run: cargo login --registry=makepress $KTRA_TOKEN
             - run: just test
-  udeps:
-    executor: makepress-orb/rust
-    steps:
-      - checkout
-      - makepress-orb/with-rust:
-          steps:
-            - run: cargo login --registry=makepress $KTRA_TOKEN
-            - run: just udeps
   build-and-publish-main:
     executor: aws-ecr/default
     steps:
