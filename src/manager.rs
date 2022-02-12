@@ -1,4 +1,7 @@
-use std::{collections::{HashMap, HashSet}, sync::Arc};
+use std::{
+    collections::{HashMap, HashSet},
+    sync::Arc,
+};
 
 use async_trait::async_trait;
 use bollard::{
@@ -43,17 +46,19 @@ impl MakepressManager for ContainerManager {
     async fn list(&self) -> Result<Vec<String>> {
         let label = "prometheus.makepress.name";
         let mut name_set = HashSet::new();
-        let containers = self.docker_instance.list_containers(Some(ListContainersOptions::<_> {
-            all: true,
-            filters: hash_map! {
-                "label" => vec![label],
-            },
-            ..Default::default()
-        }))
-        .await
-        .map_err::<Error, _>(|e| {
-            (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
-        })?;
+        let containers = self
+            .docker_instance
+            .list_containers(Some(ListContainersOptions::<_> {
+                all: true,
+                filters: hash_map! {
+                    "label" => vec![label],
+                },
+                ..Default::default()
+            }))
+            .await
+            .map_err::<Error, _>(|e| {
+                (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
+            })?;
         for container in containers {
             let labels = container.labels.unwrap();
             let name = labels.get("prometheus.makepress.name").unwrap();
@@ -272,7 +277,9 @@ impl MakepressManager for ContainerManager {
         let s = self.clone();
         let n = name.as_ref().to_string();
         tokio::spawn(async move {
-            s.backup_manager.set_status(id, BackupState::Running).unwrap();
+            s.backup_manager
+                .set_status(id, BackupState::Running)
+                .unwrap();
             let r = s
                 .docker_instance
                 .create_exec(
@@ -294,13 +301,15 @@ impl MakepressManager for ContainerManager {
                     },
                 )
                 .await;
-            s.backup_manager.set_status(
-                id,
-                match r {
-                    Ok(_) => BackupState::Finished,
-                    Err(e) => BackupState::Error(e.to_string()),
-                },
-            ).unwrap();
+            s.backup_manager
+                .set_status(
+                    id,
+                    match r {
+                        Ok(_) => BackupState::Finished,
+                        Err(e) => BackupState::Error(e.to_string()),
+                    },
+                )
+                .unwrap();
         });
         Ok(BackupAcceptedResponse { job_id: id })
     }
@@ -319,13 +328,23 @@ impl MakepressManager for ContainerManager {
                     BackupState::Error(e) => format!("Error: {}", e),
                     BackupState::Finished => "Finished".to_string(),
                 },
-                access_url: if let BackupState::Finished = status {Some(format!("http://api.{}/backups/download/{}", self.config.domain, id))} else {None},
+                access_url: if let BackupState::Finished = status {
+                    Some(format!(
+                        "http://api.{}/backups/download/{}",
+                        self.config.domain, id
+                    ))
+                } else {
+                    None
+                },
             })
     }
 
     /// This version of makepress does not yet support cancelling backups
     async fn cancel_backup(&self, _id: Uuid) -> Result<()> {
-        Err(Error::IOError(std::io::Error::new(std::io::ErrorKind::Unsupported, "This version of the makepress api does not support cancelling backups")))
+        Err(Error::IOError(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "This version of the makepress api does not support cancelling backups",
+        )))
     }
 }
 

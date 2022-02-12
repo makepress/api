@@ -50,6 +50,10 @@ macro_rules! hash_map {
     });
 }
 
+fn handle_options() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    warp::any().and(warp::options()).map(warp::reply)
+}
+
 #[tokio::main]
 async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     if std::env::var_os("RUST_LOG").is_none() {
@@ -62,9 +66,15 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     let manager = manager::ContainerManager::create_from_envs(docker, db).await?;
 
-    warp::serve(makepress_lib::routes(manager).or(routes::all()).with(warp::log("makepress")))
-        .run(([0, 0, 0, 0], 8080))
-        .await;
+    warp::serve(
+            handle_options()
+            .or(makepress_lib::routes(manager))
+            .or(routes::all())
+            .with(warp::log("makepress"))
+            .with(warp::filters::cors::cors().allow_any_origin()),
+    )
+    .run(([0, 0, 0, 0], 8080))
+    .await;
 
     Ok(())
 }
