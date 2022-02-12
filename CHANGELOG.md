@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/makepress/api/compare/v1.1.0...v1.2.0) (2022-02-12)
+
+
+### Features
+
+* Add route to list all instance names ([49bd5b6](https://www.github.com/makepress/api/commit/49bd5b69a37f7712fa51f060df30d8edbaca0dda))
+
+
+### Bug Fixes
+
+* **deps:** update dependency rust ([65326dd](https://www.github.com/makepress/api/commit/65326ddd2a7f34398d1342f49dd59ef9b0239d7a))
+* **deps:** update rust crate serde to 1.0.136 ([b171c10](https://www.github.com/makepress/api/commit/b171c106e35da1518f063e30cac9b2e7d503278e))
+* **deps:** update rust crate tokio to 1.16.1 ([60043f9](https://www.github.com/makepress/api/commit/60043f977ad8c8acf87db8bd7f120b44ab566999))
+* **deps:** Upgrade makepress-lib to v2.1.0 ([49bd5b6](https://www.github.com/makepress/api/commit/49bd5b69a37f7712fa51f060df30d8edbaca0dda))
+* Remove cargo-udeps from CI ([d2027f0](https://www.github.com/makepress/api/commit/d2027f0409d4eba025c9bbf264d920c6a6442a8c))
+
 ## [1.1.0](https://www.github.com/makepress/api/compare/v1.0.1...v1.1.0) (2021-12-22)
 
 
