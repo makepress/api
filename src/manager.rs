@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::{HashMap, HashSet}, sync::Arc};
 
 use async_trait::async_trait;
 use bollard::{
@@ -40,6 +40,29 @@ pub struct ContainerManager {
 
 #[async_trait]
 impl MakepressManager for ContainerManager {
+    async fn list(&self) -> Result<Vec<String>> {
+        let label = "prometheus.makepress.name";
+        let mut name_set = HashSet::new();
+        let containers = self.docker_instance.list_containers(Some(ListContainersOptions::<_> {
+            all: true,
+            filters: hash_map! {
+                "label" => vec![label],
+            },
+            ..Default::default()
+        }))
+        .await
+        .map_err::<Error, _>(|e| {
+            (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
+        })?;
+        for container in containers {
+            let labels = container.labels.unwrap();
+            let name = labels.get("prometheus.makepress.name").unwrap();
+            name_set.insert(name.clone());
+        }
+
+        Ok(name_set.into_iter().collect())
+    }
+
     async fn get<T: AsRef<str> + Send>(&self, name: T) -> Result<InstanceInfo> {
         let label = format!("prometheus.makepress.name={}", name.as_ref());
         let wordpress = {
