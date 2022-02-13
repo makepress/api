@@ -12,6 +12,7 @@ use bollard::{
     volume::{CreateVolumeOptions, ListVolumesOptions},
     Docker,
 };
+use log::warn;
 use makepress_lib::{
     uuid::Uuid, BackupAcceptedResponse, BackupCheckResponse, Error, InstanceInfo, MakepressManager,
     Status,
@@ -113,7 +114,7 @@ impl MakepressManager for ContainerManager {
                 .ok_or_else(|| Error::InstanceMissing(name.as_ref().to_string()))?
                 .clone()
         };
-        let wordpress_status = match wordpress.status {
+        let wordpress_status = match wordpress.state {
             Some(x) if x.to_lowercase() == "created" => Status::Offline,
             Some(x) if x.to_lowercase() == "restarting" => Status::Starting,
             Some(x) if x.to_lowercase() == "running" => Status::Running,
@@ -121,9 +122,12 @@ impl MakepressManager for ContainerManager {
             Some(x) if x.to_lowercase() == "paused" => Status::Offline,
             Some(x) if x.to_lowercase() == "exited" => Status::Offline,
             Some(x) if x.to_lowercase() == "dead" => Status::Failing,
-            _ => Status::Failing,
+            x => {
+                warn!("unknown status: {:?}", x);
+                Status::Failing
+            },
         };
-        let database_status = match database.status.clone() {
+        let database_status = match database.state.clone() {
             Some(x) if x.to_lowercase() == "created" => Status::Offline,
             Some(x) if x.to_lowercase() == "restarting" => Status::Starting,
             Some(x) if x.to_lowercase() == "running" => Status::Running,
@@ -131,7 +135,10 @@ impl MakepressManager for ContainerManager {
             Some(x) if x.to_lowercase() == "paused" => Status::Offline,
             Some(x) if x.to_lowercase() == "exited" => Status::Offline,
             Some(x) if x.to_lowercase() == "dead" => Status::Failing,
-            _ => Status::Failing,
+            x => {
+                warn!("unknown status: {:?}", x);
+                Status::Failing
+            },
         };
         Ok(InstanceInfo {
             name: name.as_ref().to_string(),
