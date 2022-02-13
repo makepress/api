@@ -15,7 +15,7 @@ use bollard::{
 use log::warn;
 use makepress_lib::{
     uuid::Uuid, BackupAcceptedResponse, BackupCheckResponse, Error, InstanceInfo, MakepressManager,
-    Status,
+    Status, CreateInfo,
 };
 
 use crate::{
@@ -140,6 +140,11 @@ impl MakepressManager for ContainerManager {
                 Status::Failing
             },
         };
+        let host_type = match wordpress.labels.unwrap_or_default().get("prometheus.makepress.host_type") {
+            Some(x) if x == "Managed" => makepress_lib::HostType::Managed,
+            Some(x) if x == "Unmanaged" => makepress_lib::HostType::Unmanaged,
+            _ => unreachable!("host type is not valid")
+        };
         Ok(InstanceInfo {
             name: name.as_ref().to_string(),
             wordpress_status,
@@ -148,10 +153,11 @@ impl MakepressManager for ContainerManager {
                 .created
                 .unwrap_or_else(|| database.created.unwrap_or_default()),
             labels: hash_map! {},
+            host_type
         })
     }
 
-    async fn create<T: AsRef<str> + Send>(&self, name: T) -> Result<InstanceInfo> {
+    async fn create<T: AsRef<str> + Send>(&self, name: T, options: CreateInfo) -> Result<InstanceInfo> {
         let n = name.as_ref();
         if n == "api" {
             return Err(Error::Unknown);
@@ -185,6 +191,14 @@ impl MakepressManager for ContainerManager {
             .map_err::<Error, _>(|e| {
                 (Box::new(e) as Box<dyn std::error::Error + Send + Sync>).into()
             })?;
+        let domain = match options.host_type {
+            makepress_lib::HostType::Managed => format!("{}.{}", n, self.config.domain),
+            makepress_lib::HostType::Unmanaged => n.to_string(),
+        };
+        let host_label = match options.host_type {
+            makepress_lib::HostType::Managed => "Managed",
+            makepress_lib::HostType::Unmanaged => "Unmanaged",
+        };
         self.docker_instance
             .create_container(
                 Some(CreateContainerOptions { name: n }),
@@ -194,12 +208,13 @@ impl MakepressManager for ContainerManager {
                         &format!("WORDPRESS_DB_USER={}", self.config.db_username),
                         &format!("WORDPRESS_DB_PASSWORD={}", self.config.db_password),
                         "WORDPRESS_DB_NAME=wordpress",
-                        &format!("VIRTUAL_HOST={}.{}", n, self.config.domain),
+                        &format!("VIRTUAL_HOST={}", domain),
                     ]),
                     image: Some("wordpress"),
                     labels: Some(hash_map! {
                         CONTAINER_LABEL => "",
-                        "prometheus.makepress.name" => n
+                        "prometheus.makepress.name" => n,
+                        "promethues.makepress.host_type" => host_label
                     }),
                     host_config: Some(HostConfig {
                         network_mode: Some(self.config.network_name.clone()),

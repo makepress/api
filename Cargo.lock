@@ -641,9 +641,9 @@ dependencies = [
 
 [[package]]
 name = "makepress-lib"
-version = "2.1.0"
+version = "3.0.0"
 source = "registry+https://github.com/makepress/crates.git"
-checksum = "2d1a3899d179cf1f399c9197df31296b5e5e90468caef28387609e39385e2812"
+checksum = "323d0ba35e0c38b4d4d4c1fe125a8b87ed5c5698fa0f4e734c791d97fc459188"
 dependencies = [
  "async-trait",
  "futures",
