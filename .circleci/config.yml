@@ -2,7 +2,7 @@ version: 2.1
 
 workflows:
   version: 2
-  rust:
+  branch:
     jobs:
       - check:
           context: [aws]
@@ -10,6 +10,9 @@ workflows:
           context: [aws]
       - makepress-orb/release-please-single:
           context: [lulubot]
+          filters:
+            branches:
+              only: main
       - build-and-publish-main:
           context: [aws]
           requires:
@@ -20,12 +23,10 @@ workflows:
             branches:
               only:
                 - main
+  release:
+    jobs:
       - build-and-publish-tagged:
           context: [aws]
-          requires:
-            - check
-            - test
-            - makepress-orb/release-please-single
           filters:
             tags:
               only: /^v.*/
