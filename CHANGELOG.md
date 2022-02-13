@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.1](https://www.github.com/makepress/api/compare/v1.2.0...v1.2.1) (2022-02-13)
+
+
+### Bug Fixes
+
+* **deps:** update makepress-orb orb to v2.3.0 ([f4311c4](https://www.github.com/makepress/api/commit/f4311c4e1186fe6acbc779cbd0102ceabdfb3c7c))
+
 ## [1.2.0](https://www.github.com/makepress/api/compare/v1.1.0...v1.2.0) (2022-02-12)
 
 
