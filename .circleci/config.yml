@@ -50,19 +50,25 @@ jobs:
             - run: cargo login --registry=makepress $KTRA_TOKEN
             - run: just test
   build-and-publish-main:
-    executor: aws-ecr/default
+    docker:
+      - image: cimg/base:2022.02
     steps:
       - checkout
       - aws-ecr/build-and-push-image:
           repo: makepress-api
           create-repo: true
+          setup-remote-docker: true
+          remote-docker-layer-caching: true
   build-and-publish-tagged:
-    executor: aws-ecr/default
+    docker:
+      - image: cimg/base:2022.02
     steps:
       - aws-ecr/build-and-push-image:
           repo: makepress-api
           create-repo: true
           tag: ${CIRCLE_TAG/v/''}
+          setup-remote-docker: true
+          remote-docker-layer-caching: true
 
 orbs:
   makepress-orb: makepress/makepress-orb@2.3.0
