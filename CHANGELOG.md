@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.3.0](https://www.github.com/makepress/api/compare/v1.2.0...v1.3.0) (2022-02-13)
+
+
+### Features
+
+* Added support for multiple hosting types ([efb77fe](https://www.github.com/makepress/api/commit/efb77fe077b3dac434d29db0add6982fa1101d09))
+
+
+### Bug Fixes
+
+* Add CORS ([c26e1a2](https://www.github.com/makepress/api/commit/c26e1a22e9c27916f657ed211dc81a43a29e1cf1))
+* **deps:** update makepress-orb orb to v2.3.0 ([f4311c4](https://www.github.com/makepress/api/commit/f4311c4e1186fe6acbc779cbd0102ceabdfb3c7c))
+* **deps:** Upgrade makepress-lib to 3.0.0 ([efb77fe](https://www.github.com/makepress/api/commit/efb77fe077b3dac434d29db0add6982fa1101d09))
+* warn when we get an unknown status ([4690ae2](https://www.github.com/makepress/api/commit/4690ae2c17251a8178950ff27d4c99ea86b9e0ff))
+
 ## [1.2.0](https://www.github.com/makepress/api/compare/v1.1.0...v1.2.0) (2022-02-12)
 
 
