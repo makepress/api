@@ -214,7 +214,7 @@ impl MakepressManager for ContainerManager {
                     labels: Some(hash_map! {
                         CONTAINER_LABEL => "",
                         "prometheus.makepress.name" => n,
-                        "promethues.makepress.host_type" => host_label
+                        "prometheus.makepress.host_type" => host_label
                     }),
                     host_config: Some(HostConfig {
                         network_mode: Some(self.config.network_name.clone()),
