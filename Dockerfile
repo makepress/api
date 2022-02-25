@@ -1,4 +1,4 @@
-FROM rust:1.58 AS chef
+FROM rust:1.59 AS chef
 RUN apt-get update \
     && apt-get install -y lld \
     && rm -rf /var/lib/apt/lists/*
