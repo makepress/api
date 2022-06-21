@@ -71,5 +71,5 @@ jobs:
           remote-docker-layer-caching: true
 
 orbs:
-  makepress-orb: makepress/makepress-orb@2.3.0
+  makepress-orb: makepress/makepress-orb@2.4.0
   aws-ecr: circleci/aws-ecr@7.3.0
