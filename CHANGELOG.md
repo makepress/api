@@ -1,5 +1,36 @@
 # Changelog
 
+### [1.3.1](https://www.github.com/makepress/api/compare/v1.3.0...v1.3.1) (2022-07-21)
+
+
+### Bug Fixes
+
+* **deps:** update dependency cimg/base to v2022.03 ([de9b48a](https://www.github.com/makepress/api/commit/de9b48a75f05b9fd6e2ebffeeaf147b9d4fe5cd4))
+* **deps:** update dependency cimg/base to v2022.04 ([2bcbd6a](https://www.github.com/makepress/api/commit/2bcbd6aceef599bcb42313125b73d0cffa490e06))
+* **deps:** update dependency cimg/base to v2022.05 ([5b14741](https://www.github.com/makepress/api/commit/5b14741c4f2280f9732264aa05ad2661a3d1b0c0))
+* **deps:** update dependency cimg/base to v2022.06 ([62a389b](https://www.github.com/makepress/api/commit/62a389b85abb88300b4c7a6d82e9eb9b4a65b5f2))
+* **deps:** update dependency cimg/base to v2022.07 ([33c9faa](https://www.github.com/makepress/api/commit/33c9faa3ab5a9c67b93e4c030383466f2d6b710a))
+* **deps:** update dependency rust ([5ac2d6d](https://www.github.com/makepress/api/commit/5ac2d6d2afc00fef7ff0e7dec860642818e7c43f))
+* **deps:** update dependency rust ([b0248f1](https://www.github.com/makepress/api/commit/b0248f1372efaf0e0047d6d8fb98c2e68bd1d656))
+* **deps:** update dependency rust ([e9fe893](https://www.github.com/makepress/api/commit/e9fe8933aac3d5ffef9635a22fd4bbc86e9c9721))
+* **deps:** update dependency rust ([52a3152](https://www.github.com/makepress/api/commit/52a31525c746a5b47c8935d483cfe23eab50d1db))
+* **deps:** update dependency rust to v1.62.1 ([8651989](https://www.github.com/makepress/api/commit/8651989deba8701d058bbb9b950ada4838793a2b))
+* **deps:** update makepress-orb orb to v2.4.0 ([0b9016a](https://www.github.com/makepress/api/commit/0b9016a7acd0de3b01d33f34ed75d6d718de7baa))
+* **deps:** update rust crate async-trait to 0.1.53 ([e60a332](https://www.github.com/makepress/api/commit/e60a332dfe294b6c4d6c9a2d91c5f51353476250))
+* **deps:** update rust crate async-trait to 0.1.56 ([29149f0](https://www.github.com/makepress/api/commit/29149f01f78ca98ebf35d74a2385172660d89d39))
+* **deps:** update rust crate log to 0.4.15 ([f826dc6](https://www.github.com/makepress/api/commit/f826dc67dbd8706ddbae2942cd2c5ba4c5e730d6))
+* **deps:** update rust crate log to 0.4.16 ([d062f47](https://www.github.com/makepress/api/commit/d062f47bd81bd767c45a3b9addd73047da37140d))
+* **deps:** update rust crate log to 0.4.17 ([5619800](https://www.github.com/makepress/api/commit/56198005b1055672803147eb1b0aa886cdb76461))
+* **deps:** update rust crate serde to 1.0.137 ([9095048](https://www.github.com/makepress/api/commit/90950485e81e59458ae4fef7ae9ee1dc7e94d3ca))
+* **deps:** update rust crate serde to 1.0.138 ([dd56bf7](https://www.github.com/makepress/api/commit/dd56bf7e95b6f27b4bc6dc58eb1473e6d58acb79))
+* **deps:** update rust crate serde to 1.0.139 ([67958da](https://www.github.com/makepress/api/commit/67958da31ef9799e73d2b47ec026b459e0409275))
+* **deps:** update rust crate serde to 1.0.140 ([8379898](https://www.github.com/makepress/api/commit/837989893ddcd1b6a2176a7158c128f9ad0a7c99))
+* **deps:** update rust crate tokio to 1.17.0 ([a4e60d5](https://www.github.com/makepress/api/commit/a4e60d5996a22c5fd23d33dd1f67c572b01d873b))
+* **deps:** update rust crate tokio to 1.18.0 ([6de726d](https://www.github.com/makepress/api/commit/6de726d4290f40de5eaca90d5298c34fef53bbbb))
+* **deps:** update rust crate tokio to 1.18.2 ([b948ec1](https://www.github.com/makepress/api/commit/b948ec12217cc605d60fbeadad1657a8a99a8ccb))
+* **deps:** update rust crate tokio to 1.19.0 ([50924d8](https://www.github.com/makepress/api/commit/50924d8205a231409c39dd0e979a8845383fae9a))
+* label for host type ([bc31c09](https://www.github.com/makepress/api/commit/bc31c090117aa4d49469d00f42901c354f612b8a))
+
 ## [1.3.0](https://www.github.com/makepress/api/compare/v1.2.0...v1.3.0) (2022-02-13)
 
 
