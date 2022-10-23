@@ -72,4 +72,4 @@ jobs:
 
 orbs:
   makepress-orb: makepress/makepress-orb@2.4.1
-  aws-ecr: circleci/aws-ecr@7.3.0
+  aws-ecr: circleci/aws-ecr@8.1.3
