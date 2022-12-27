@@ -11,7 +11,7 @@ bollard = "0.11.1"
 log = "0.4.17"
 makepress-lib = { version = "3.0.0", registry = "makepress" }
 pretty_env_logger = "0.4.0"
-serde = "1.0.151"
+serde = "1.0.152"
 sled = "0.34.7"
 tokio = { version = "1.23.0", features = ["full"] }
 warp = "0.3.3"
