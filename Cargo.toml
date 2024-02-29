@@ -8,7 +8,7 @@ edition = "2018"
 [dependencies]
 async-trait = "0.1.64"
 bollard = "0.11.1"
-log = "0.4.17"
+log = "0.4.21"
 makepress-lib = { version = "3.0.0", registry = "makepress" }
 pretty_env_logger = "0.4.0"
 serde = "1.0.152"
